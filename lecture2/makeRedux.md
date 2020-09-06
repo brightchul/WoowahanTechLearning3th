@@ -46,7 +46,7 @@ export const createStore = () => {
 ```javascript
 // redux.js
 export const createStore = () => {
-	const state = Object.create(null);
+    const state = Object.create(null);
     const getState = () => ({...state});
     return {getState};
 }
@@ -58,7 +58,7 @@ export const createStore = () => {
 
 ### 4 . 상태를 변경
 
-원하는 의도에 따라 상태를 변경하고 싶다. 하지만 직접적으로 객체에 접근해서 변경하는 것은 오염의 여지가 크다. 따라서 변경 메서드로만 해보자. 상태는 임의로 `count : 0` 으로 해보기로 했다. 
+원하는 의도에 따라 상태를 변경하고 싶다. 하지만 직접적으로 객체에 접근해서 변경하는 것은 오염의 여지가 크다. 따라서 변경 메서드로만 해보자. 상태는 임의로 `count : 1` 로 해보기로 했다. 
 
 상태객체는 Object.freeze를 이용해서 변경이 불가능하게 만들었고 immutable하게 만들도록 강제했다.
 
@@ -94,7 +94,7 @@ import {createStore, makeFreezedObj} from "./redux.js";
 // 비즈니스 로직을 외부에서 주입한다.
 // state 객체 초기화를 여기서 해준다.
 const reducer = (state = makeFreezedObj(), action) => {
-	switch(action) {
+    switch(action) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: 1});
         default: throw new Error("등록되어 있지 않는 action입니다.");
@@ -131,7 +131,7 @@ import {createStore, makeFreezedObj} from "./redux.js";
 
 // 비즈니스 로직을 외부에서 생성한다.
 const reducer = (state = makeFreezedObj(), action) => {
-	switch(action) {
+    switch(action) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: 1});
         default: throw new Error("등록되어 있지 않는 action입니다.");
@@ -177,7 +177,7 @@ export const createStore = (reducer) => {
 import {createStore, makeFreezedObj} from "./redux.js";
 
 const reducer = (state = makeFreezedObj(), action) => {
-	switch(action.type) {
+    switch(action.type) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: action.resetValue?? 1});
         default: throw new Error("등록되어 있지 않는 action입니다.");
@@ -221,7 +221,7 @@ export const createStore = (reducer) => {
 import {createStore, makeFreezedObj, Action} from "./redux.js";
 
 const reducer = (state = makeFreezedObj(), action) => {
-	switch(action.type) {
+    switch(action.type) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: action.resetValue?? 1});
         default: throw Error("등록되어 있지 않는 action입니다.");

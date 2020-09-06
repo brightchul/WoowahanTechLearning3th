@@ -1,13 +1,33 @@
+export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
+  return Object.freeze({ ...originObj, ...newObj });
+};
+
 export const createStore = (reducer) => {
   let state;
-  const listeners = new Set();
+  const getState = () => ({ ...state });
 
-  return {
-    getState: () => ({ ...state }),
-    subscribe: (fn) => listeners.add(fn),
-    dispatch: (action) => (state = reducer(state, action)) && listeners.forEach((fn) => fn()),
+  const listeners = new Set();
+  const subscribe = (fn) => listeners.add(fn);
+  const publish = () => listeners.forEach((listener) => listener());
+
+  const dispatch = (action) => {
+    if (!(action instanceof Action)) throw Error("action은 Action 객체이어야 합니다.");
+    state = reducer(state, action);
+    publish();
   };
+  return { getState, dispatch, subscribe };
 };
+
+export class Action {
+  constructor(type, otherState) {
+    if (type === undefined) throw Error("type은 반드시 있어야 합니다.");
+
+    this.type = type;
+    Object.assign(this, otherState);
+  }
+}
+
+// https://codesandbox.io/s/keen-microservice-2j6uq?file=/src/redux.js
 
 // 앱하나에 스토어 하나, 중앙 스토어
 // 스토어는 그냥 객체이다.

@@ -1,27 +1,23 @@
-import { createStore } from "./redux.js";
-
 // ?? (Nullish coalescing operator) 는 Node14부터 동작한다.
 // 따라서 아래 예제는 Node14이상으로 실행시켜야 제대로 실행이 된다.
+// index.js
+import { createStore, makeFreezedObj, Action } from "./redux.js";
 
-const reducer = (state = {}, action = { type: "" }) => {
+// 비즈니스 로직을 외부에서 주입한다.
+const reducer = (state = makeFreezedObj(), action) => {
   switch (action.type) {
     case "increment":
-      return { ...state, count: (state.count ?? 0) + 1 };
+      return makeFreezedObj(state, { count: (state.count ?? 1) + 1 });
     case "reset":
-      return { ...state, count: action.resetCount ?? 1 };
+      return makeFreezedObj(state, { count: action.resetValue ?? 1 });
     default:
-      return { ...state };
+      throw Error("등록되어 있지 않는 action입니다.");
   }
 };
 
-const store = createStore(reducer);
-const showConsole = () => console.log(store.getState());
-store.subscribe(showConsole);
+const state = createStore(reducer);
+state.subscribe(() => console.log(state.getState().count));
 
-const storeIncrement = () => store.dispatch({ type: "increment" });
-const storeReset = (resetCount) => store.dispatch({ type: "reset", resetCount });
-
-storeIncrement();
-storeReset(-10);
-storeIncrement();
-storeReset(0);
+console.log(state.getState());
+state.dispatch(new Action("increment"));
+state.dispatch(new Action("reset", { resetValue: 10 }));
