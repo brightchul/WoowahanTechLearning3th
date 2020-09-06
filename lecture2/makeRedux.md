@@ -19,7 +19,9 @@ export const createStore = () => {
 }
 ```
 
+​    
 
+​    
 
 ### 2 . creteStore를 클로져로 변경
 
@@ -33,7 +35,9 @@ export const createStore = () => {
 }
 ```
 
+​    
 
+​    
 
 ### 3 . getter로 연결
 
@@ -48,7 +52,9 @@ export const createStore = () => {
 }
 ```
 
+​    
 
+​    
 
 ### 4 . 상태를 변경
 
@@ -71,24 +77,23 @@ export const createStore = () => {
 }
 ```
 
+​    
 
-
-
+​    
 
 ### 5 . 변경사항이 발생 : reset 기능을 추가한다.
 
-사용하다 보니 변경사항이 생겼다. reset을 추가해 달라고 한다. 다시 redux.js의 코드를 수정해야 할까?
+사용하다 보니 변경사항이 생겼다. reset을 추가해 달라고 한다. 다시 redux.js의 코드를 수정해야 할까? 하지만  redux.js의 수정을 하는 것은 파일을 지속적으로 수정하는게 된다. redux.js를 여러 곳에서 사용하게 되면 변경의 여파가 redux.js를 사용하는 모든 곳에 미치게 된다. 
 
-하지만  redux.js의 수정을 하는 것은 파일을 지속적으로 수정하는게 된다. redux.js를 여러곳에서 사용하게 되면 변경의 여파가 redux.js를 사용하는 모든 곳에 미치게 된다. 
-
-좀더 안전하게 사용하기 위해 추상화 시켜서 변경 로직을 사용자 측에서 직접 입력하는 쪽으로 변경해 보자! 이렇게 하기 위해서는 createStore에서 비즈니스 로직을 받아야 한다. 이것의 이름을 reducer라고 하자.
+좀더 안전하게 사용하기 위해 추상화 시켜서 변경 로직을 사용자 측에게 받는 쪽으로 변경해 보자. 이렇게 하기 위해서는 createStore에서 비즈니스 로직을 받아야 한다. 이것의 이름을 reducer라고 하자. 하는 김에 내부의 객체 초기화도 같이 해주자.
 
 ```javascript
 // index.js
 import {createStore, makeFreezedObj} from "./redux.js";
 
 // 비즈니스 로직을 외부에서 주입한다.
-const reducer = (state, action) => {
+// state 객체 초기화를 여기서 해준다.
+const reducer = (state = makeFreezedObj(), action) => {
 	switch(action) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: 1});
@@ -105,25 +110,27 @@ export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
 };
 
 export const createStore = (reducer) => {
-    let state = makeFreezedObj(undefined, {count: 1});
+    let state;
     const getState = () => ({...state});
     
     return {getState};
 }
 ```
 
+​    
 
+​    
 
-### 6 . 변경 로직은 내부에서 호출해서 반영한다.
+### 6 . 변경 로직은 외부에서 호출해서 반영한다.
 
-변경 로직을 외부에서 주입받은 것 까지는 좋았는데 외부에서 어떻게 호출을 해야 할까? 이것을 위해 dispatch라는 함수를 만들고 그것이 상태에 반영될 수 있도록 만든다.
+변경 로직을 외부에서 주입받은 것 까지는 좋았는데 외부에서 어떻게 호출을 해야 할까? 이것을 위해 dispatch라는 메서드를 만들고 상태에 반영될 수 있도록 만든다.
 
 ```javascript
 // index.js
 import {createStore, makeFreezedObj} from "./redux.js";
 
 // 비즈니스 로직을 외부에서 생성한다.
-const reducer = (state, action) => {
+const reducer = (state = makeFreezedObj(), action) => {
 	switch(action) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: 1});
@@ -142,7 +149,7 @@ export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
 };
 
 export const createStore = (reducer) => {
-    let state = makeFreezedObj(undefined, {count: 1});
+    let state;
     const getState = () => ({...state});
     
     // 외부에서 받은 reducer에 다시 해당하는 명령어를 받도록 한다.
@@ -152,22 +159,24 @@ export const createStore = (reducer) => {
 }
 ```
 
+​    
 
+​    
 
-### 7 . 변경사항 발생 : 초기화 값을 정한다.
+### 7 . 변경사항 발생 : reset 값을 정한다.
 
 또 다시 요구사항이 추가되었다. reset 명령어에 초기화 값을 반영할 수 있게 해달라고 한다. 기존의 action 명령어는 string 타입이라서 전달을 할수가 없다. 그러니 이것을 객체 방식으로 만들자. 
 
 객체로 만들 때 action의 type으로 해당 명령어를 정의하고 그외의 값들에 대해서는 프로퍼티로 추가하자.
 
 > 여기서 중요한 점은 요구사항이 내려왔지만 이제 redux.js에는 변경이 되지 않는다는 점이다
-> 요구사항으로 인한 변경이 redux.js가 아닌 사용자즉 영역인 index.js에서만 일어난다
+> 요구사항으로 인한 변경이 redux.js가 아닌 사용자 영역인 index.js에서만 일어난다
 
 ```javascript
 // index.js
 import {createStore, makeFreezedObj} from "./redux.js";
 
-const reducer = (state, action) => {
+const reducer = (state = makeFreezedObj(), action) => {
 	switch(action.type) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: action.resetValue?? 1});
@@ -189,7 +198,7 @@ export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
 };
 
 export const createStore = (reducer) => {
-    let state = makeFreezedObj(undefined, {count: 1});
+    let state;
     const getState = () => ({...state});
     
     // 외부에서 받은 reducer에 다시 해당하는 명령어를 받도록 한다.
@@ -199,7 +208,9 @@ export const createStore = (reducer) => {
 }
 ```
 
+​    
 
+​    
 
 ### 8 . action 객체를 만들어서 강제하자.
 
@@ -209,7 +220,7 @@ export const createStore = (reducer) => {
 // index.js
 import {createStore, makeFreezedObj, Action} from "./redux.js";
 
-const reducer = (state, action) => {
+const reducer = (state = makeFreezedObj(), action) => {
 	switch(action.type) {
         case "increment": return makeFreezedObj(state, {count: (state.count ?? 1)+1 });
         case "reset":return makeFreezedObj(state, {count: action.resetValue?? 1});
@@ -229,7 +240,7 @@ export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
 };
 
 export const createStore = (reducer) => {
-    let state = makeFreezedObj(undefined, {count: 1});
+    let state;
     const getState = () => ({...state});
     
 
@@ -252,20 +263,19 @@ export class Action {
 }
 ```
 
+​    
 
+​    
 
 ### 9 . subscribe를 만들자
 
-상태의 변경에 대해서는 어느정도 만들어진 것 같다. 이제 상태가 변경되었을 때 그 변경을 반영할 수 있는 함수들을 추가할 수 있게 subscribe를 만들어 보자. 중복을 줄이기 위해서 Set을 활용했다. 이제 상태가 변경되었을 때 자동으로 실행시켜 보자.
-
-그리고 redux.js 내부의 state의 상태 초기값을 두기 보다 외부에서 주입되는 reducer에서 state 상태 초기값을 하자. 
+상태의 변경에 대해서는 어느정도 만들어진 것 같다. 이제 상태가 변경되었을 때 반응할 수 있는 함수들을 추가할 수 있게 subscribe를 만들어 보자. 중복을 줄이기 위해서 Set을 활용했다. 이제 상태가 변경되었을 때 자동으로 실행시켜 보자.
 
 ```javascript
 // index.js
 import { createStore, makeFreezedObj, Action } from "./redux.js";
 
-// state = {} 로 기본 값을 세팅해준다.
-const reducer = (state = {}, action) => {
+const reducer = (state = makeFreezedObj(), action) => {
   switch (action.type) {
     case "increment":
       return makeFreezedObj(state, { count: (state.count ?? 1) + 1 });
@@ -292,7 +302,7 @@ export const makeFreezedObj = (originObj = Object.create(null), newObj) => {
 };
 
 export const createStore = (reducer) => {
-  let state;	// 외부 reducer에서 기본 값 설정으로 자연스럽게 설정이 된다.
+  let state;
   const getState = () => ({ ...state });
 
   // subscribe를 추가했다.
@@ -319,7 +329,9 @@ export class Action {
 }
 ```
 
+​    
 
+​    
 
 ### 10 . 이제 실행 결과를 보자.
 
