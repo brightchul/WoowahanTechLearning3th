@@ -1,0 +1,5 @@
+<ul class="test" onclick=function(){console.log("test");}>
+	<li class="abcd" id="userId" onclick=(e)=>{console.log("hello");}>React</li>
+	<li>Redux</li>
+	<li>TypeScript</li>
+</ul>
