@@ -18,6 +18,8 @@
 
 ✔ 2일차 : [[내용 정리]](./lecture2/lecture2.md), [[리덕스 구현]](./lecture2/makeRedux.md)
 
+✔ 3일차 : [[내용 정리]](./lecture3/lecture3.md), [[트랜스 파일링 구현]](./lecture3/example)
+
 
 
 
