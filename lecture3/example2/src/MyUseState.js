@@ -46,8 +46,8 @@ function getStateOrderIdx() {
  */
 function isComponentStateInit(functionalComponent) {
   return (
-    !stateValueMap.has(functionalComponent) ||
-    !stateFunctionMap.get(functionalComponent)[getStateOrderIdx()]
+    stateValueMap.has(functionalComponent) &&
+    stateFunctionMap.get(functionalComponent)[getStateOrderIdx()]
   );
 }
 
@@ -96,8 +96,8 @@ function getStateAndFunction(functionalComponent) {
 export function useMyState(initValue, functionalComponent) {
   changeStateOrderIdx(functionalComponent);
   if (isComponentStateInit(functionalComponent)) {
-    return setStateInit(functionalComponent, initValue);
-  } else {
     return getStateAndFunction(functionalComponent);
+  } else {
+    return setStateInit(functionalComponent, initValue);
   }
 }
