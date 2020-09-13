@@ -303,7 +303,7 @@ function App() {
 
 - 바벨의 트랜스컴파일의 컨셉을 [[간단하게 구현]](./example)
 
-- 훅도 간단히 구현해보자 [[간단하게 구현]](./example2)
+- 훅도 간단히 구현해보자 [[간단하게 구현]](./example2) [[실행]](https://codesandbox.io/s/gracious-shockley-kbtj1?file=/src/MyUseState.js)
 
 ​    
 
