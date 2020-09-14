@@ -15,9 +15,13 @@
 
 ### 예제 실행법
 
+#### 로컬 실행
+
 1. example2 폴더에 들어온다.
 2. `npm install` 을 한다.
 3. `npm start` 를 한다.
 
+#### 온라인 실행
 
+[[CodeSandbox실행]](https://codesandbox.io/s/gracious-shockley-kbtj1?file=/src/MyUseState.js)
 

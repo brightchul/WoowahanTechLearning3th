@@ -1,3 +1,5 @@
+# React & TypeScript 4일차
+
 ```jsx
 import React from "react";
 import ReactDOM from "react-dom";
@@ -40,66 +42,75 @@ const App = ({ store: { sessionList } }) => (
 );
 ```
 
+​    
+
+### 아키텍처의 원칙
+
 아키텍처는 실제로는 작은 코드에서 부터 시작한다.
-몇가지 원칙들이 있다.
 
 1. 이름만 잘 정해도 된다.
-2. 크기를 쪼개라. (쪼개는 기준, 시점은 언제인건가?)
+2. 크기를 쪼개라.
 3. 약간 분리되면 좋겠는데? 라는 생각이 들때가 적절한 타이밍이다.
 
-```jsx
-// App.jsx
-const SessionItem = ({ title }) => <li>{title}</li>;
+​    
 
-const App = ({ store: { sessionList } }) => {
-    const {displayOrder, toggleDisplayOrder} = React.useState('ASC');
+### 함수 컴포넌트의 상태
 
-    const orderedSessionList = sessionList
-        .map((session, i) => ({...session, order: i}))
-        .sort((a,b)=>>a.order - b.order);
+함수컴포넌트는 원래는 내부에서 만들어봐야 다시 변경한 뒤에 렌더링 되지 않는다. 그래서 클래스 컴포넌트를 만들고 내부 상태 및 상태 변경 함수를 만들어서 했다.
 
-    const onToggleDisplayOrder = () => {
-        toggleDisplayOrder(displayOrder === 'ASC' ? 'DESC' : 'ASC');
-    }
-
-    return (
-    <div>
-        <header>
-            <h1>React and TypeScript</h1>
-        </header>
-        <p>전체 세션 갯수 : {sessionList.length}개</p>
-        <button onClick={toggleDisplayOrder}>재정렬</button>
-        <ul>
-            {sessionList.map({title} => <SessionItem title />)}
-        </ul>
-    </div>
-    );
-};
-```
-
-함수컴포넌트는 원래는 내부에서 만들어봐야 다시 변경한 뒤에 렌더링 되지 않는다.
-그래서 클래스 컴포넌트를 만들고 내부 상태 및 상태 변경 함수를 만들어서 했다.
-
-리액트 훅을 만들어서 함수 컴포넌트 안에서도 상태를 가지게 되었다.
-훅을 사용해서 상태가 변경하고 다시 해당 함수컴포넌트를 호출해서 렌더링을 해주는 것이다.
+리액트 훅을 만들어서 함수 컴포넌트 안에서도 상태를 가지게 되었다. 훅을 사용해서 상태가 변경하고 다시 해당 함수컴포넌트를 호출해서 렌더링을 해주는 것이다.
 
 클래스 컴포넌트는 상태, 상태 변경, 컴포넌트 코드 들이 전부 메소드, 생성자 등에 퍼져 있는데 함수 컴포넌트는 함수 안에 모든게 다 들어 있으니 가독성, 단순함, 응집성이 좋다.
 
-### 3년차
+```jsx
+// 이렇게 하위 컴포넌트를 하나 더 만든다.
+import React, { useState } from "react";
+import "./styles.css";
+
+const sortTypeValue = (orderType) => (orderType === "ASC" && 1) || -1;
+const copyAndSort = (arr, type) =>
+    arr
+        .map((session, i) => ({ ...session, order: i }))
+        .sort((a, b) => sortTypeValue(type) * (a.order - b.order));
+
+// 하위 컴포넌트를 적용해서 가독성을 높인다.
+const SessionItem = ({ session: { title } }) => <li>{title}</li>;
+
+export default function App({ store }) {
+    const [displayOrder, toggleDisplayOrder] = useState("ASC");
+    const orderedList = copyAndSort(store, displayOrder);
+    const onToggleDisplayOrder = () => toggleDisplayOrder(displayOrder === "ASC" ? "DESC" : "ASC");
+
+    return (
+        <div>
+            <header>
+                <h1>React and TypeScript</h1>
+            </header>
+            <p>전체 세션 갯수 : {orderedList.length}개</p>
+            <button onClick={onToggleDisplayOrder}>재정렬</button>
+            <ul>
+                {orderedList.map((session, i) => (
+                    <SessionItem key={i} session={session} />
+                ))}
+            </ul>
+        </div>
+    );
+}
+```
+
+[[실행]](https://codesandbox.io/s/interesting-colden-1v5re?file=/src/App.js)
+
+​    
+
+### Q&A
 
 3년차 개발자 : 기본은 넘어섰으니 경험, 다양성, 비즈니스 도메인 등에 대한 업력을 쌓는 시기라고 생각한다. 4년차가 되면 실무적으로 가볍게 리딩할 수 있다고 생각한다. 그래서 이 시기 되면 개발 역량만 보지 않는다.
 
-### 존중받는 코드
-
 비즈니스 코드들은 다 존중받을 가치가 있다.
 
----
+​    
 
-훅이 만들어지면서 함수 컴포넌트도 이제 상태를 가질 수 있게 되었다.
-
-훅을 사용할 때 클로저가 걸린다.
-
-### useEffect
+## useEffect
 
 ```jsx
 useEffect(() => {
@@ -116,6 +127,8 @@ useEffect(() => {
 
 JS는 명시적으로 메모리 관리 메소드를 제공해 주지 않는다. 그러니 신경쓰지 말아라.
 
+​    
+
 ## 제네레이터
 
 ```js
@@ -128,15 +141,14 @@ async function asyncFunction() {}
 
 ```js
 // 지연을 설명하기 위한 비유이다.
+// x값이 확정되는 것을 지연한다. y의 값이 실행 될때 x값이 확정된다.
+// 함수를 반환할 수 있다는 특징을 가지고 지연을 흉내낼 수 있다.
+// rxjs, MobX 등이 이러한 지연테크닉을 활용한 것이다.
 const x = () => 10;
 const y = x() * 10;
 ```
 
-x값이 확정되는 것을 지연한다.
-y의 값이 실행 될때 x값이 확정된다.
-
-함수를 반환할 수 있다는 특징을 가지고 지연을 흉내낼 수 있다.
-rxjs, MobX등이 이러한 지연테크닉을 활용한 것이다.
+​    
 
 ```js
 const p = new Promise(function (resolve, reject) {
@@ -147,8 +159,7 @@ const p = new Promise(function (resolve, reject) {
 
 p.then(lfunction(r) {
     console.log(r);
-})
-;
+});
 
 
 function* make() {
@@ -158,18 +169,17 @@ function* make() {
     }
 }
 
-cosnt i = make();
+const i = make();
 console.log(i); // 이렇게 하면 제네레이터 객체가 출력된다.
-
 ```
 
-## 제네레이터
+​    
 
-제네레이터는 실제로는 코루틴의 구현체이다.
-코루틴이라느 것은
-함수는 입력값을 받고 계산을 한 다음 결과값을 반환한다. 이것을 함수라고 한다. 만약 리턴이 없는 것은 프로시저라고 한다.
+### 코루틴 (coroutine) [[MDN 참고]](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Iterators_and_Generators)
 
-함수인데, 함수를 리턴을 여러번 할 수 있으면 어떠할까? 함수가 다시 호출할 때 함수가 리턴했던 시점에서 다시 시작하는 것이다. 이것을 코루틴이라고 한다. 이러한 개념중 일부를 참조해서 제네레이터로 구현해 놓았다.
+- 제네레이터는 실제로는 코루틴의 구현체이다.
+
+- 함수인데, 함수를 리턴을 여러번 할 수 있으면 어떠할까? 함수가 다시 호출할 때 함수가 리턴했던 시점에서 다시 시작하는 것이다. 이것을 코루틴이라고 한다. 이러한 개념중 일부를 참조해서 제네레이터로 구현해 놓았다.
 
 ```js
 function* make() {
@@ -180,19 +190,21 @@ function* make() {
 }
 
 // 일반함수에서는 실행하면 바로 함수가 종료될 것이다.
-// 하지만 제네레이터 함수는 객체를 전달한다.
-// 그 객체 안에 next라는 메소드를 전달해 준다.
-// next를 호출하면 그때 함수가 호출된다.
-// 호출시  yield된 값이 반환된다.
+// 하지만 제네레이터 함수는 객체를 전달하고 그 객체 안에 next라는 메소드를 전달해 준다.
+// next를 호출하면 그때 함수가 호출되며 yield된 값이 반환된다.
 const i = make();
 
 // 다음에 yield된 값이 있는지 아닌지 확인할 수 없으니
-// done이라는 값도 같이 준다.
+// done : boolean 이라는 값도 같이 준다.
 console.log(i.next()); // {value: 1, done:false}
 
 // 무한 루프지만 괜찮다. next 하기 전까지는 실행이 멈춰있기 때문이다.
 // return 은 함수를 끝내는 것이고 yield는 끝내지 않는다.
 ```
+
+​    
+
+### 제네레이터와 함수의 차이점
 
 기존 함수와 달리 제네레이터는 바깥 실행 영역과 서로 커뮤니케이션을 할 수 있다.
 이것을 이용해서 많은 것을 할 수 있다.
@@ -215,6 +227,10 @@ if (value instanceof Promise) {
 }
 ```
 
+​    
+
+### 동기적으로 적용가능한 제네레이터
+
 제네레이터 함수 내부를 보면 마치 동기 코드처럼 보인다.
 바깥 영역에서 함수 내부를 제어하고, 함수 안쪽에서는 비동기적 상황도 동기적으로 적용할 수 있다.
 
@@ -229,11 +245,13 @@ async function main2() {
 }
 ```
 
+​    
+
+### async와 generator
+
 async함수는 promise에 최적화 되어 있는 함수이다. 반면 제네레이터는 그 외의 다양한 케이스에 대해서도 활용이 가능하다. 참고로 async함수 또한 내부적으로는 제네레이터로 되어 있다.
 
-제네레이터는 여러가지를 활용할 수 있는데 그중 하나가 비동기적 코드를 동기적으로 다룰 수 있다는 것이다.
-
-제네레이터는 코루틴을 구현한 구현체이다. 그 응용중 하나가 비동기에 대한 활용이다.
+제네레이터는 여러가지를 활용할 수 있는데 그중 하나가 비동기적 코드를 동기적으로 다룰 수 있다는 것이다. 제네레이터는 코루틴을 구현한 구현체이다. 그 응용중 하나가 비동기에 대한 활용이다.
 
 ```js
 const log = console.log;
@@ -266,4 +284,6 @@ show(i1, value1.value);
 show(i2, value2.value);
 ```
 
-> 다음번에는 lazy 호출
+[[실행]](https://codesandbox.io/s/hardcore-raman-i77qg)
+
+> 다음번에는 lazy 호출에 대해서 다루기로 한다.
