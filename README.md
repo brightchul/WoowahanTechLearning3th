@@ -22,6 +22,8 @@
 
 ✔ 4일차 : [[내용 정리]](./lecture4/lecture4.md)
 
+✔ 5일차 : [[내용 정리]](./lecture5/lecture5.md)
+
 
 
 
