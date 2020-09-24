@@ -24,6 +24,8 @@
 
 ✔ 5일차 : [[내용 정리]](./lecture5/lecture5.md)
 
+✔ 6일차 : [[내용 정리]](./lecture6/lecture6.md)  [[예제코드]](./lecture6/example)
+
 
 
 
